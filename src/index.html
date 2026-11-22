@@ -2,38 +2,75 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri App</title>
-    <script type="module" src="/main.js" defer></script>
+    <title>ChronoRing</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="main.js" defer></script>
   </head>
-
   <body>
-    <main class="container">
-      <h1>Welcome to Tauri</h1>
+    <header class="topbar">
+      <h1>ChronoRing</h1>
+      <button id="new-btn" class="fab" title="New alarm (Ctrl+N)" aria-label="New alarm">+</button>
+    </header>
 
-      <div class="row">
-        <a href="https://tauri.app" target="_blank">
-          <img src="/assets/tauri.svg" class="logo tauri" alt="Tauri logo" />
-        </a>
-        <a
-          href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
-          target="_blank"
-        >
-          <img
-            src="/assets/javascript.svg"
-            class="logo vanilla"
-            alt="JavaScript logo"
-          />
-        </a>
-      </div>
-      <p>Click on the Tauri logo to learn more about the framework</p>
+    <main>
+      <p id="load-error" class="error-banner" hidden></p>
 
-      <form class="row" id="greet-form">
-        <input id="greet-input" placeholder="Enter a name..." />
-        <button type="submit">Greet</button>
-      </form>
-      <p id="greet-msg"></p>
+      <section id="upcoming-section" hidden>
+        <h2>Upcoming</h2>
+        <ul id="upcoming" class="cards"></ul>
+      </section>
+
+      <section id="past-section" hidden>
+        <h2>Finished</h2>
+        <ul id="past" class="cards"></ul>
+      </section>
+
+      <p id="empty" class="empty" hidden>
+        Nothing scheduled. Press <kbd>+</kbd> or <kbd>Ctrl</kbd>+<kbd>N</kbd> to add one.
+      </p>
     </main>
+
+    <div id="composer-backdrop" class="backdrop" hidden>
+      <form id="composer" class="composer" aria-labelledby="composer-title" novalidate>
+        <div class="composer-head">
+          <h2 id="composer-title">New reminder</h2>
+          <button type="button" id="close-btn" class="icon-btn" aria-label="Close">&times;</button>
+        </div>
+
+        <textarea
+          id="note"
+          rows="4"
+          maxlength="280"
+          placeholder="What do you need to remember?"
+        ></textarea>
+
+        <div class="field">
+          <span>Date</span>
+          <input type="date" id="date" required />
+        </div>
+
+        <div class="field">
+          <span>Time</span>
+          <div class="time-row">
+            <select id="hour" aria-label="Hour"></select>
+            <span class="colon">:</span>
+            <select id="minute" aria-label="Minute"></select>
+            <div class="meridiem" role="group" aria-label="AM or PM">
+              <button type="button" data-meridiem="am" aria-pressed="true">AM</button>
+              <button type="button" data-meridiem="pm" aria-pressed="false">PM</button>
+            </div>
+          </div>
+        </div>
+
+        <p id="composer-error" class="error-banner" hidden></p>
+
+        <div class="composer-actions">
+          <button type="button" id="cancel-btn" class="ghost">Cancel</button>
+          <button type="submit" id="save-btn" class="primary">Save reminder</button>
+        </div>
+        <p class="hint">Ctrl+Enter to save · Esc to close</p>
+      </form>
+    </div>
   </body>
 </html>

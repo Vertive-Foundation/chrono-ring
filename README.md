@@ -1,2 +1,2 @@
-# Chrono Ring
+# ChronoRing
 
