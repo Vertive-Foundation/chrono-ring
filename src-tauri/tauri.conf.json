@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "chrono-ring",
+  "productName": "ChronoRing",
   "version": "0.1.0",
   "identifier": "com.vc.chrono-ring",
   "build": {
@@ -10,9 +10,12 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "chrono-ring",
-        "width": 800,
-        "height": 600
+        "title": "ChronoRing",
+        "width": 960,
+        "height": 720,
+        "minWidth": 480,
+        "minHeight": 520,
+        "decorations": false
       }
     ],
     "security": {

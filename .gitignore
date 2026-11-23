@@ -22,3 +22,19 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment & secrets (CRITICAL)
+.env
+.env.*
+!.env.example
+
+# Windows thumbnail & folder caches
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Tauri & Frontend build/test caches
+.tauri
+*.tsbuildinfo
+.eslintcache
+coverage/
