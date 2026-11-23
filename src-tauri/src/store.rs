@@ -1,4 +1,4 @@
-use crate::alarm::{Alarm, AlarmError};
+use crate::alarm::{Alarm, AlarmError, Status};
 use std::fmt;
 
 /// Everything that can go wrong when working with the store.
@@ -78,6 +78,21 @@ impl AlarmStore {
         Ok(())
     }
 
+    /// Changes an alarm's note and time, and makes it waiting again.
+    /// This is how an accidentally dismissed alarm is brought back.
+    pub fn update(&mut self, id: u64, note: &str, fire_at: i64) -> Result<Alarm, StoreError> {
+        let checked = Alarm::new(id, note, fire_at)?;
+        let alarm = self
+            .alarms
+            .iter_mut()
+            .find(|alarm| alarm.id == id)
+            .ok_or(StoreError::NotFound(id))?;
+        alarm.note = checked.note;
+        alarm.fire_at = fire_at;
+        alarm.status = Status::Waiting;
+        Ok(alarm.clone())
+    }
+
     /// Finds every alarm that is due at `now`, marks each one as ringing,
     /// and returns copies. An alarm is returned only once, because after it
     /// starts ringing it is no longer waiting.
@@ -151,9 +166,21 @@ mod tests {
 
         let first = store.take_due(1000);
         assert_eq!(first.len(), 1);
-        assert_eq!(first[0].status, crate::alarm::Status::Ringing);
+        assert_eq!(first[0].status, Status::Ringing);
 
         let second = store.take_due(2000);
         assert!(second.is_empty());
+    }
+
+    #[test]
+    fn update_reschedules_and_brings_back_a_dismissed_alarm() {
+        let mut store = AlarmStore::new();
+        let alarm = store.add("Gym", 1000).unwrap();
+        store.dismiss(alarm.id).unwrap();
+
+        let updated = store.update(alarm.id, "Gym later", 5000).unwrap();
+        assert_eq!(updated.status, Status::Waiting);
+        assert_eq!(updated.fire_at, 5000);
+        assert_eq!(updated.note, "Gym later");
     }
 }

@@ -59,6 +59,22 @@ fn add_alarm(
     Ok(alarm.into())
 }
 
+/// Changes an existing alarm and makes it waiting again.
+#[tauri::command]
+fn update_alarm(
+    id: u64,
+    note: String,
+    when: DateInput,
+    store: State<'_, SharedStore>,
+) -> Result<AlarmView, String> {
+    let fire_at = time::to_timestamp(&when).map_err(|e| e.to_string())?;
+    time::ensure_in_future(fire_at, time::now()).map_err(|e| e.to_string())?;
+
+    let mut guard = store.lock().map_err(|e| e.to_string())?;
+    let alarm = guard.update(id, &note, fire_at).map_err(|e| e.to_string())?;
+    Ok(alarm.into())
+}
+
 /// Silences an alarm but keeps it in the list.
 #[tauri::command]
 fn dismiss_alarm(id: u64, store: State<'_, SharedStore>) -> Result<(), String> {
@@ -81,6 +97,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             list_alarms,
             add_alarm,
+            update_alarm,
             dismiss_alarm,
             delete_alarm
         ])
