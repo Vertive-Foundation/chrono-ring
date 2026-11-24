@@ -27,7 +27,7 @@ impl From<AlarmError> for StoreError {
 }
 
 /// Holds all alarms in memory. Ids are handed out by the store, never reused.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AlarmStore {
     alarms: Vec<Alarm>,
     next_id: u64,
@@ -50,10 +50,11 @@ impl AlarmStore {
     }
 
     /// All alarms, sorted by fire time (earliest first).
+    /// Sorts references first so each alarm is cloned only once.
     pub fn list(&self) -> Vec<Alarm> {
-        let mut sorted = self.alarms.clone();
+        let mut sorted: Vec<&Alarm> = self.alarms.iter().collect();
         sorted.sort_by_key(|alarm| alarm.fire_at);
-        sorted
+        sorted.into_iter().cloned().collect()
     }
 
     /// Removes an alarm entirely.
@@ -69,11 +70,7 @@ impl AlarmStore {
 
     /// Silences an alarm without removing it.
     pub fn dismiss(&mut self, id: u64) -> Result<(), StoreError> {
-        let alarm = self
-            .alarms
-            .iter_mut()
-            .find(|alarm| alarm.id == id)
-            .ok_or(StoreError::NotFound(id))?;
+        let alarm = self.find_mut(id)?;
         alarm.dismiss();
         Ok(())
     }
@@ -81,12 +78,9 @@ impl AlarmStore {
     /// Changes an alarm's note and time, and makes it waiting again.
     /// This is how an accidentally dismissed alarm is brought back.
     pub fn update(&mut self, id: u64, note: &str, fire_at: i64) -> Result<Alarm, StoreError> {
+        // Validate the new note first, so a bad edit cannot half-apply.
         let checked = Alarm::new(id, note, fire_at)?;
-        let alarm = self
-            .alarms
-            .iter_mut()
-            .find(|alarm| alarm.id == id)
-            .ok_or(StoreError::NotFound(id))?;
+        let alarm = self.find_mut(id)?;
         alarm.note = checked.note;
         alarm.fire_at = fire_at;
         alarm.status = Status::Waiting;
@@ -98,19 +92,20 @@ impl AlarmStore {
     /// starts ringing it is no longer waiting.
     pub fn take_due(&mut self, now: i64) -> Vec<Alarm> {
         let mut due = Vec::new();
-        for alarm in self.alarms.iter_mut() {
-            if alarm.is_due(now) {
-                alarm.start_ringing();
-                due.push(alarm.clone());
-            }
+        for alarm in self.alarms.iter_mut().filter(|a| a.is_due(now)) {
+            alarm.start_ringing();
+            due.push(alarm.clone());
         }
         due
     }
-}
 
-impl Default for AlarmStore {
-    fn default() -> Self {
-        Self::new()
+    /// Looks up an alarm by id for changing it in place.
+    /// Shared by every method that needs one alarm.
+    fn find_mut(&mut self, id: u64) -> Result<&mut Alarm, StoreError> {
+        self.alarms
+            .iter_mut()
+            .find(|alarm| alarm.id == id)
+            .ok_or(StoreError::NotFound(id))
     }
 }
 
