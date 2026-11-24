@@ -1,4 +1,5 @@
 const { invoke } = window.__TAURI__.core;
+const { listen } = window.__TAURI__.event;
 const appWindow = window.__TAURI__.window.getCurrentWindow();
 
 const $ = (id) => document.getElementById(id);
@@ -407,6 +408,10 @@ document.addEventListener("keydown", (event) => {
     closeComposer();
   }
 });
+
+// The Rust checker tells us the moment an alarm starts ringing, so the list
+// updates immediately instead of waiting for the next poll.
+listen("alarms-ringing", () => refresh());
 
 refresh();
 setInterval(refresh, 5000);

@@ -27,6 +27,9 @@ const CHECK_INTERVAL: Duration = Duration::from_secs(1);
 /// Name of the event the screen listens for when alarms start ringing.
 const ALARMS_RINGING_EVENT: &str = "alarms-ringing";
 
+/// File name of the database, inside the app's data folder.
+const DATABASE_FILE: &str = "alarms.db";
+
 /// What the screen receives for each alarm. It adds a ready-to-show time string.
 #[derive(Clone, Serialize)]
 pub struct AlarmView {
@@ -55,7 +58,8 @@ impl From<Alarm> for AlarmView {
 #[tauri::command]
 fn list_alarms(store: State<'_, SharedStore>) -> Result<Vec<AlarmView>, String> {
     let guard = store.lock().map_err(|e| e.to_string())?;
-    Ok(guard.list().into_iter().map(AlarmView::from).collect())
+    let alarms = guard.list().map_err(|e| e.to_string())?;
+    Ok(alarms.into_iter().map(AlarmView::from).collect())
 }
 
 /// Validates the form's date and time, then saves the alarm.
@@ -117,7 +121,12 @@ fn delete_alarm(
 
 /// Stops the tone once no alarm is still ringing. Other alarms keep it going.
 fn silence_if_nothing_ringing(store: &AlarmStore, sound: &AlarmSound) {
-    if !store.list().iter().any(|alarm| alarm.status == Status::Ringing) {
+    // If the database cannot be read, this counts as "nothing ringing",
+    // so the tone is never left running by mistake.
+    let any_ringing = store
+        .list()
+        .is_ok_and(|alarms| alarms.iter().any(|alarm| alarm.status == Status::Ringing));
+    if !any_ringing {
         sound.stop();
     }
 }
@@ -136,10 +145,18 @@ fn check_once(app: &AppHandle) {
     let store = app.state::<SharedStore>();
 
     // The lock is released at the end of this block, before any other work.
-    let due = match store.lock() {
-        Ok(mut guard) => guard.take_due(time::now()),
+    let due = {
         // A command panicked while holding the lock. Try again on the next tick.
-        Err(_) => return,
+        let Ok(mut guard) = store.lock() else {
+            return;
+        };
+        match guard.take_due(time::now()) {
+            Ok(due) => due,
+            Err(err) => {
+                eprintln!("could not check for due alarms: {err}");
+                return;
+            }
+        }
     };
     if due.is_empty() {
         return;
@@ -194,9 +211,16 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
-        .manage(Mutex::new(AlarmStore::new()))
         .manage(AlarmSound::default())
         .setup(|app| {
+            // The app's own data folder, created on first run.
+            // On Windows this is inside AppData\Roaming\com.vc.chrono-ring.
+            let data_dir = app.path().app_data_dir()?;
+            std::fs::create_dir_all(&data_dir)?;
+            let store = AlarmStore::open(&data_dir.join(DATABASE_FILE))?;
+            app.manage(Mutex::new(store));
+
+            // The checker starts after the store is managed, so its first tick can use it.
             let handle = app.handle().clone();
             thread::spawn(move || run_checker(handle));
             Ok(())
