@@ -66,6 +66,7 @@ impl AlarmStore {
     }
 
     /// Opens a temporary database in memory. Used by the tests.
+    #[cfg(test)]
     pub fn open_in_memory() -> Result<Self, StoreError> {
         Self::initialize(Connection::open_in_memory()?)
     }

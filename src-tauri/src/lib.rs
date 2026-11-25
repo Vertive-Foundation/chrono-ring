@@ -12,9 +12,10 @@ use alarm::{Alarm, Status};
 use serde::Serialize;
 use sound::AlarmSound;
 use store::AlarmStore;
-use tauri::menu::{Menu, MenuItem};
+use tauri::menu::{CheckMenuItem, Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Emitter, Manager, State, WindowEvent};
+use tauri::{AppHandle, Emitter, Manager, State, WindowEvent, Wry};
+use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use tauri_plugin_notification::NotificationExt;
 use time::DateInput;
 
@@ -34,6 +35,7 @@ const DATABASE_FILE: &str = "alarms.db";
 
 /// Identifiers for the tray menu items. Matched when a menu item is clicked.
 const TRAY_SHOW_ID: &str = "show";
+const TRAY_AUTOSTART_ID: &str = "autostart";
 const TRAY_QUIT_ID: &str = "quit";
 
 /// What the screen receives for each alarm. It adds a ready-to-show time string.
@@ -213,17 +215,50 @@ fn show_main_window(app: &AppHandle) {
     }
 }
 
+/// Turns "Start with Windows" on or off to match the checkbox.
+/// The checkbox already flipped when clicked, so we read its new state and apply it.
+/// If Windows refuses the change, the checkbox is put back to what it was.
+fn toggle_autostart(app: &AppHandle, item: &CheckMenuItem<Wry>) {
+    let want_enabled = item.is_checked().unwrap_or(false);
+    let manager = app.autolaunch();
+
+    let result = if want_enabled {
+        manager.enable()
+    } else {
+        manager.disable()
+    };
+
+    if let Err(err) = result {
+        eprintln!("could not change start with Windows: {err}");
+        let _ = item.set_checked(!want_enabled);
+    }
+}
+
 /// Builds the tray icon with its right-click menu.
 /// A left click on the icon shows the window again.
 fn build_tray(app: &AppHandle) -> tauri::Result<()> {
+    // The checkbox starts out matching what Windows currently has.
+    let autostart_on = app.autolaunch().is_enabled().unwrap_or(false);
+
     let show_item = MenuItem::with_id(app, TRAY_SHOW_ID, "Show ChronoRing", true, None::<&str>)?;
+    let autostart_item = CheckMenuItem::with_id(
+        app,
+        TRAY_AUTOSTART_ID,
+        "Start with Windows",
+        true,
+        autostart_on,
+        None::<&str>,
+    )?;
     let quit_item = MenuItem::with_id(app, TRAY_QUIT_ID, "Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show_item, &quit_item])?;
+    let menu = Menu::with_items(app, &[&show_item, &autostart_item, &quit_item])?;
 
     let icon = app
         .default_window_icon()
         .cloned()
         .ok_or_else(|| tauri::Error::AssetNotFound("default window icon".into()))?;
+
+    // A clone is cheap and points at the same menu item, so the menu handler can use it.
+    let autostart_for_events = autostart_item.clone();
 
     TrayIconBuilder::new()
         .icon(icon)
@@ -231,8 +266,9 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
         .menu(&menu)
         // Left click opens the window directly, so the menu is only for right click.
         .show_menu_on_left_click(false)
-        .on_menu_event(|app, event| match event.id.as_ref() {
+        .on_menu_event(move |app, event| match event.id.as_ref() {
             TRAY_SHOW_ID => show_main_window(app),
+            TRAY_AUTOSTART_ID => toggle_autostart(app, &autostart_for_events),
             // Quit is the only real exit. Closing the window just hides it.
             TRAY_QUIT_ID => app.exit(0),
             _ => {}
@@ -258,6 +294,9 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
+        // Registers the app to start at sign-in when the tray toggle is on.
+        // None means no extra arguments are passed at startup.
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .manage(AlarmSound::default())
         .on_window_event(|window, event| {
             // Closing the window hides it, so the checker and the tray keep working.
