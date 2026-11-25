@@ -12,7 +12,9 @@ use alarm::{Alarm, Status};
 use serde::Serialize;
 use sound::AlarmSound;
 use store::AlarmStore;
-use tauri::{AppHandle, Emitter, Manager, State};
+use tauri::menu::{Menu, MenuItem};
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+use tauri::{AppHandle, Emitter, Manager, State, WindowEvent};
 use tauri_plugin_notification::NotificationExt;
 use time::DateInput;
 
@@ -29,6 +31,10 @@ const ALARMS_RINGING_EVENT: &str = "alarms-ringing";
 
 /// File name of the database, inside the app's data folder.
 const DATABASE_FILE: &str = "alarms.db";
+
+/// Identifiers for the tray menu items. Matched when a menu item is clicked.
+const TRAY_SHOW_ID: &str = "show";
+const TRAY_QUIT_ID: &str = "quit";
 
 /// What the screen receives for each alarm. It adds a ready-to-show time string.
 #[derive(Clone, Serialize)]
@@ -174,7 +180,7 @@ fn check_once(app: &AppHandle) {
         }
     }
     if plan.shows_window() {
-        bring_to_front(app);
+        show_main_window(app);
     }
 
     if let Err(err) = app.emit(ALARMS_RINGING_EVENT, views) {
@@ -196,14 +202,55 @@ fn send_toast(app: &AppHandle, alarm: &AlarmView) {
     }
 }
 
-/// Restores the main window if it is hidden or minimized, then focuses it.
-fn bring_to_front(app: &AppHandle) {
+/// Brings the main window back from the tray or from minimized, then focuses it.
+/// Used by the checker, the tray icon, and the tray's Show menu item.
+fn show_main_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
-        // If Windows refuses focus, the alarm still rings on screen, so ignore the error.
+        // If Windows refuses focus, the window is still visible, so ignore the error.
         let _ = window.unminimize();
         let _ = window.show();
         let _ = window.set_focus();
     }
+}
+
+/// Builds the tray icon with its right-click menu.
+/// A left click on the icon shows the window again.
+fn build_tray(app: &AppHandle) -> tauri::Result<()> {
+    let show_item = MenuItem::with_id(app, TRAY_SHOW_ID, "Show ChronoRing", true, None::<&str>)?;
+    let quit_item = MenuItem::with_id(app, TRAY_QUIT_ID, "Quit", true, None::<&str>)?;
+    let menu = Menu::with_items(app, &[&show_item, &quit_item])?;
+
+    let icon = app
+        .default_window_icon()
+        .cloned()
+        .ok_or_else(|| tauri::Error::AssetNotFound("default window icon".into()))?;
+
+    TrayIconBuilder::new()
+        .icon(icon)
+        .tooltip("ChronoRing")
+        .menu(&menu)
+        // Left click opens the window directly, so the menu is only for right click.
+        .show_menu_on_left_click(false)
+        .on_menu_event(|app, event| match event.id.as_ref() {
+            TRAY_SHOW_ID => show_main_window(app),
+            // Quit is the only real exit. Closing the window just hides it.
+            TRAY_QUIT_ID => app.exit(0),
+            _ => {}
+        })
+        .on_tray_icon_event(|tray, event| {
+            // React on button release, the normal Windows convention for a click.
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                show_main_window(tray.app_handle());
+            }
+        })
+        .build(app)?;
+
+    Ok(())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -212,6 +259,13 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
         .manage(AlarmSound::default())
+        .on_window_event(|window, event| {
+            // Closing the window hides it, so the checker and the tray keep working.
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                let _ = window.hide();
+            }
+        })
         .setup(|app| {
             // The app's own data folder, created on first run.
             // On Windows this is inside AppData\Roaming\com.vc.chrono-ring.
@@ -223,6 +277,8 @@ pub fn run() {
             // The checker starts after the store is managed, so its first tick can use it.
             let handle = app.handle().clone();
             thread::spawn(move || run_checker(handle));
+
+            build_tray(app.handle())?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
