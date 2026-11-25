@@ -1,72 +1,94 @@
-/* Dark is the default. Light values apply when the system is light
-   (System mode) or when Light is chosen. Dark is forced by the Dark choice. */
+/* ChronoRing visual system.
+   Paper and ink, one signal colour, serif for times and titles.
+   Amber is kept for things that need attention: ringing alarms and the Stop button. */
+
+/* Scrolling still works with the wheel and touchpad, but no scrollbar is drawn anywhere */
+* {
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 
 :root {
-  --bg: #0f1115;
-  --surface: #171a21;
-  --surface-2: #1e222b;
-  --border: #2a2f3a;
-  --border-hover: #353b48;
-  --text: #e8eaf0;
-  --muted: #8a92a3;
-  --accent: #f5b84b;
-  --accent-hover: #ffc766;
-  --accent-ink: #1a1204;
-  --danger: #ff6b6b;
-  --error-text: #ffb4b4;
-  --warn-text: #f5b84b;
-  --ringing: #ff8a4c;
-  --ringing-hover: #ff9d66;
-  --topbar: rgba(15, 17, 21, 0.85);
-  --overlay: rgba(5, 6, 8, 0.6);
-  --shadow: rgba(0, 0, 0, 0.5);
-  --radius: 14px;
+  --bg: #0e0e0f;
+  --surface: #161618;
+  --surface-2: #1d1d20;
+  --border: #29292e;
+  --border-hover: #3a3a41;
+  --text: #ece8df;
+  --muted: #8d887c;
+  --ink: #ece8df;
+  --ink-text: #0e0e0f;
+  --accent: #e8923f;
+  --accent-ink: #1a0e02;
+  --danger: #e06c5c;
+  --error-text: #f2b3a8;
+  --warn-text: #e8c07a;
+  --ringing: #e8923f;
+  --ringing-hover: #f0a45a;
+  --topbar: rgba(14, 14, 15, 0.88);
+  --overlay: rgba(4, 4, 5, 0.6);
+  --shadow: rgba(0, 0, 0, 0.55);
+  --radius: 12px;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: "Segoe UI", system-ui, sans-serif;
   color-scheme: dark;
 }
 
+/* Light paper. Applies when the system is light (and Dark is not chosen),
+   or when Light is chosen explicitly. */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --bg: #f5f6f9;
-    --surface: #ffffff;
-    --surface-2: #eef0f5;
-    --border: #dde1ea;
-    --border-hover: #c5ccd9;
-    --text: #1b1f2a;
-    --muted: #5d6676;
-    --accent: #e9a23b;
-    --accent-hover: #d98f22;
-    --accent-ink: #1a1204;
-    --danger: #d63c3c;
-    --error-text: #a12020;
-    --warn-text: #94600c;
-    --ringing: #e26a2c;
-    --ringing-hover: #cf5c20;
-    --topbar: rgba(245, 246, 249, 0.9);
-    --overlay: rgba(20, 25, 40, 0.35);
-    --shadow: rgba(20, 25, 40, 0.2);
+  :root:not([data-theme="dark"]),
+  :root[data-theme="light"] {
+    --bg: #f3efe6;
+    --surface: #fbf9f4;
+    --surface-2: #ece7dc;
+    --border: #dfd8c8;
+    --border-hover: #c9bfa8;
+    --text: #1c1a16;
+    --muted: #6f6858;
+    --ink: #1c1a16;
+    --ink-text: #f3efe6;
+    --accent: #c4501c;
+    --accent-ink: #fff7f0;
+    --danger: #b8402f;
+    --error-text: #8f2a1d;
+    --warn-text: #7a5210;
+    --ringing: #c4501c;
+    --ringing-hover: #a9441a;
+    --topbar: rgba(243, 239, 230, 0.92);
+    --overlay: rgba(40, 35, 25, 0.3);
+    --shadow: rgba(60, 50, 30, 0.18);
     color-scheme: light;
   }
 }
 
+/* An explicit Light choice always wins, even when the system is dark */
 :root[data-theme="light"] {
-  --bg: #f5f6f9;
-  --surface: #ffffff;
-  --surface-2: #eef0f5;
-  --border: #dde1ea;
-  --border-hover: #c5ccd9;
-  --text: #1b1f2a;
-  --muted: #5d6676;
-  --accent: #e9a23b;
-  --accent-hover: #d98f22;
-  --accent-ink: #1a1204;
-  --danger: #d63c3c;
-  --error-text: #a12020;
-  --warn-text: #94600c;
-  --ringing: #e26a2c;
-  --ringing-hover: #cf5c20;
-  --topbar: rgba(245, 246, 249, 0.9);
-  --overlay: rgba(20, 25, 40, 0.35);
-  --shadow: rgba(20, 25, 40, 0.2);
+  --bg: #f3efe6;
+  --surface: #fbf9f4;
+  --surface-2: #ece7dc;
+  --border: #dfd8c8;
+  --border-hover: #c9bfa8;
+  --text: #1c1a16;
+  --muted: #6f6858;
+  --ink: #1c1a16;
+  --ink-text: #f3efe6;
+  --accent: #c4501c;
+  --accent-ink: #fff7f0;
+  --danger: #b8402f;
+  --error-text: #8f2a1d;
+  --warn-text: #7a5210;
+  --ringing: #c4501c;
+  --ringing-hover: #a9441a;
+  --topbar: rgba(243, 239, 230, 0.92);
+  --overlay: rgba(40, 35, 25, 0.3);
+  --shadow: rgba(60, 50, 30, 0.18);
   color-scheme: light;
 }
 
@@ -83,7 +105,7 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: "Segoe UI", system-ui, sans-serif;
+  font-family: var(--sans);
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
   transition: background 0.2s ease, color 0.2s ease;
@@ -98,17 +120,17 @@ textarea {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--text);
   outline-offset: 2px;
 }
 
 kbd {
-  font-family: inherit;
-  font-size: 12px;
+  font-family: var(--sans);
+  font-size: 11px;
   padding: 1px 6px;
   border: 1px solid var(--border);
   border-bottom-width: 2px;
-  border-radius: 6px;
+  border-radius: 5px;
   color: var(--muted);
   background: var(--surface);
 }
@@ -116,17 +138,17 @@ kbd {
 /* Logo: the drawing lives in logo.svg. These only set its size. */
 
 .logo {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
 }
 
 .logo-lg {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
 }
 
-/* Custom title bar (replaces the Windows one) */
+/* Title bar */
 
 .topbar {
   position: sticky;
@@ -135,10 +157,10 @@ kbd {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 48px;
+  height: 52px;
   padding: 0 0 0 20px;
   background: var(--topbar);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   user-select: none;
   -webkit-user-select: none;
@@ -152,35 +174,36 @@ kbd {
 
 .topbar h1 {
   margin: 0;
-  font-size: 17px;
-  font-weight: 650;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 400;
   letter-spacing: -0.01em;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   height: 100%;
 }
 
-/* Theme switch: three-way segmented control */
+/* Theme choice: a quiet segmented control, not a pill */
 
 .theme-switch {
   display: inline-flex;
-  padding: 3px;
+  padding: 2px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 8px;
 }
 
 .theme-switch button {
-  padding: 5px 12px;
+  padding: 4px 11px;
   border: none;
-  border-radius: 999px;
+  border-radius: 6px;
   background: transparent;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
@@ -191,11 +214,11 @@ kbd {
 }
 
 .theme-switch button[aria-pressed="true"] {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--ink);
+  color: var(--ink-text);
 }
 
-/* Window controls: minimize, maximize, close */
+/* Window controls */
 
 .win-controls {
   display: flex;
@@ -232,7 +255,6 @@ kbd {
   color: #ffffff;
 }
 
-/* Maximize shows a single square, or two overlapping squares when maximized */
 .win-btn .icon-restore {
   display: none;
 }
@@ -245,26 +267,27 @@ kbd {
   display: block;
 }
 
-/* Primary pill buttons */
+/* Primary actions: ink on paper, not the accent colour */
 
 .pill-btn,
 .fab-float {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   border: none;
-  border-radius: 999px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-size: 15px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--ink-text);
+  font-size: 14px;
   font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
 
 .pill-btn {
-  padding: 10px 18px;
-  box-shadow: 0 6px 18px rgba(245, 184, 75, 0.25);
+  padding: 11px 20px;
+  box-shadow: 0 10px 28px var(--shadow);
 }
 
 .fab-float {
@@ -272,40 +295,42 @@ kbd {
   right: 24px;
   bottom: 24px;
   z-index: 6;
-  padding: 12px 18px 12px 16px;
-  box-shadow: 0 10px 30px rgba(245, 184, 75, 0.35);
+  padding: 11px 12px 11px 16px;
+  box-shadow: 0 14px 34px var(--shadow);
 }
 
 .pill-btn:hover,
 .fab-float:hover {
-  background: var(--accent-hover);
   transform: translateY(-1px);
+  opacity: 0.92;
 }
 
 .pill-btn:active,
 .fab-float:active {
-  transform: translateY(0) scale(0.97);
+  transform: translateY(0) scale(0.98);
 }
 
 .plus {
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 400;
   line-height: 1;
 }
+
+/* Shortcut badge on the floating button: outlined, not filled */
 
 .kbd-group {
   display: inline-flex;
   gap: 4px;
-  margin-left: 6px;
+  margin-left: 8px;
   padding-left: 10px;
-  border-left: 1px solid rgba(26, 18, 4, 0.25);
+  border-left: 1px solid currentColor;
+  opacity: 0.55;
 }
 
-.kbd-group kbd {
-  padding: 0 5px;
-  font-size: 11px;
-  background: rgba(255, 255, 255, 0.35);
-  border-color: rgba(26, 18, 4, 0.2);
-  color: var(--accent-ink);
+.fab-float kbd {
+  background: transparent;
+  border-color: currentColor;
+  color: inherit;
 }
 
 /* Layout */
@@ -313,81 +338,92 @@ kbd {
 main {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 24px 20px 120px;
+  padding: 32px 24px 130px;
 }
 
 section + section {
-  margin-top: 32px;
+  margin-top: 40px;
 }
 
-section h2 {
-  margin: 0 0 12px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+/* Section label: a serif italic with a hairline, quieter than a caps tag */
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  font-weight: 400;
   color: var(--muted);
+}
+
+.section-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 .error-banner,
 .warn-banner {
-  margin: 0 0 14px;
+  margin: 0 0 16px;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 14px;
 }
 
 .error-banner {
-  border: 1px solid rgba(255, 107, 107, 0.4);
-  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(224, 108, 92, 0.4);
+  background: rgba(224, 108, 92, 0.1);
   color: var(--error-text);
 }
 
 .warn-banner {
-  border: 1px solid rgba(245, 184, 75, 0.45);
-  background: rgba(245, 184, 75, 0.12);
+  border: 1px solid rgba(232, 146, 63, 0.4);
+  background: rgba(232, 146, 63, 0.1);
   color: var(--warn-text);
 }
 
-/* Empty state */
+/* Empty state: no box, just a centred page */
 
 .empty-card {
-  margin: 72px auto 0;
+  margin: 96px auto 0;
   max-width: 420px;
-  padding: 40px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  background: var(--surface);
-  border: 1px dashed var(--border-hover);
-  border-radius: 20px;
-  animation: rise-in 0.3s ease-out;
+  animation: rise-in 0.4s ease-out;
 }
 
 .empty-card .empty-title {
-  margin: 20px 0 8px;
-  font-size: 20px;
-  font-weight: 650;
-  letter-spacing: normal;
-  text-transform: none;
+  margin: 22px 0 8px;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
   color: var(--text);
 }
 
 .empty-text {
-  margin: 0 0 24px;
+  margin: 0 0 28px;
   max-width: 320px;
   color: var(--muted);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
 .shortcut {
-  margin: 16px 0 0;
+  margin: 18px 0 0;
+  font-family: var(--serif);
+  font-style: italic;
   font-size: 13px;
   color: var(--muted);
 }
 
-/* Cards */
+/* Reminder cards: the time leads, the note follows, actions sit along the bottom.
+   The grid never squeezes a card below 340px, so the time always has room. */
 
 .cards {
   list-style: none;
@@ -395,51 +431,63 @@ section h2 {
   padding: 0;
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 }
 
 .card {
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 16px 18px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  padding: 18px 20px 16px 24px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   transition: border-color 0.2s ease, opacity 0.2s ease;
 }
 
+/* The thin rule on the left edge shows the card's state at a glance */
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--text);
+}
+
 .card:hover {
   border-color: var(--border-hover);
 }
 
+/* main.js appends the note before the meta line, and column-reverse puts
+   the meta (time, status, countdown) above the note. */
 .card-body {
   min-width: 0;
-  flex: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
 }
 
-.card-note {
-  margin: 0 0 10px;
-  font-size: 16px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
+/* Time on top, large and serif: this is a clock app */
 .card-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 10px;
-  font-size: 13px;
+  gap: 4px 10px;
   color: var(--muted);
+  font-size: 12.5px;
 }
 
 .card-time {
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   color: var(--text);
-  font-size: 14px;
-  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -447,51 +495,68 @@ section h2 {
   font-variant-numeric: tabular-nums;
 }
 
+.card-note {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Status labels: small square tags, not pills */
 .pill {
-  padding: 2px 7px;
-  border-radius: 999px;
+  padding: 2px 6px;
+  border-radius: 4px;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   background: var(--surface-2);
   color: var(--muted);
 }
 
 .pill-ringing {
-  background: rgba(255, 138, 76, 0.18);
-  color: var(--ringing);
+  background: var(--ringing);
+  color: var(--accent-ink);
+}
+
+.card-ringing {
+  border-color: var(--ringing);
+  animation: ring-pulse 1.6s ease-in-out infinite;
+}
+
+.card-ringing::before {
+  background: var(--ringing);
+  width: 3px;
 }
 
 .card-dismissed {
-  opacity: 0.65;
+  opacity: 0.55;
+}
+
+.card-dismissed::before {
+  background: transparent;
 }
 
 .card-dismissed .card-note {
   color: var(--muted);
   text-decoration: line-through;
-  text-decoration-color: rgba(138, 146, 163, 0.5);
+  text-decoration-color: rgba(141, 136, 124, 0.5);
 }
 
-.card-ringing {
-  border-color: var(--ringing);
-  background: linear-gradient(180deg, rgba(255, 138, 76, 0.1), var(--surface) 60%);
-  animation: ring-pulse 1.6s ease-in-out infinite;
-}
-
-.card-ringing:hover {
-  border-color: var(--ringing);
-}
-
+/* Actions run along the bottom, separated from the text by a hairline */
 .card-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
-  flex-shrink: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
 
 .card-enter {
-  animation: card-in 0.25s ease-out;
+  animation: card-in 0.3s ease-out;
 }
 
 @keyframes card-in {
@@ -504,10 +569,10 @@ section h2 {
 @keyframes ring-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 138, 76, 0.35);
+    box-shadow: 0 0 0 0 rgba(232, 146, 63, 0.35);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(255, 138, 76, 0);
+    box-shadow: 0 0 0 6px rgba(232, 146, 63, 0);
   }
 }
 
@@ -529,37 +594,45 @@ section h2 {
 .ghost,
 .primary,
 .stop-btn {
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .ghost {
-  padding: 8px 12px;
+  padding: 7px 12px;
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text);
+  font-size: 14px;
 }
 
 .ghost:hover {
   background: var(--surface-2);
+  border-color: var(--border-hover);
 }
 
 .ghost.small {
-  padding: 6px 10px;
-  font-size: 13px;
+  padding: 5px 10px;
+  font-size: 12.5px;
+}
+
+/* Delete is permanent, so it carries the danger colour even at rest */
+.ghost.danger {
+  color: var(--danger);
+  border-color: rgba(224, 108, 92, 0.4);
 }
 
 .ghost.danger:hover {
-  color: var(--danger);
-  border-color: rgba(255, 107, 107, 0.5);
+  background: rgba(224, 108, 92, 0.1);
+  border-color: var(--danger);
 }
 
 .stop-btn {
   padding: 7px 14px;
   border: none;
   background: var(--ringing);
-  color: #1f0d02;
+  color: var(--accent-ink);
   font-size: 13px;
   font-weight: 700;
 }
@@ -571,23 +644,37 @@ section h2 {
 .primary {
   padding: 10px 18px;
   border: none;
-  background: var(--accent);
-  color: var(--accent-ink);
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--ink-text);
   font-weight: 600;
 }
 
 .primary:hover {
-  background: var(--accent-hover);
+  opacity: 0.92;
 }
 
 .primary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: wait;
 }
 
+/* The one filled danger button: used only for the final Delete in the confirm card */
+.danger-solid {
+  padding: 7px 14px;
+  border: 1px solid var(--danger);
+  background: var(--danger);
+  color: #fff7f0;
+  font-weight: 600;
+}
+
+.danger-solid:hover {
+  opacity: 0.9;
+}
+
 .icon-btn {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border: none;
   border-radius: 8px;
   background: transparent;
@@ -602,7 +689,7 @@ section h2 {
   color: var(--text);
 }
 
-/* Composer */
+/* Dialogs: the composer and the confirm card share the backdrop */
 
 .backdrop {
   position: fixed;
@@ -612,20 +699,23 @@ section h2 {
   place-items: center;
   padding: 20px;
   background: var(--overlay);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
   animation: fade-in 0.15s ease-out;
 }
 
+/* The composer scrolls inside itself if the window is short, so the buttons stay reachable */
 .composer {
   width: min(480px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   display: grid;
-  gap: 16px;
-  padding: 20px;
-  background: var(--surface-2);
+  gap: 14px;
+  padding: 22px 24px;
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 16px;
   box-shadow: 0 30px 80px var(--shadow);
-  animation: rise-in 0.18s ease-out;
+  animation: rise-in 0.2s ease-out;
 }
 
 .composer-head {
@@ -636,78 +726,262 @@ section h2 {
 
 .composer-head h2 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 650;
-  letter-spacing: normal;
-  text-transform: none;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
   color: var(--text);
+}
+
+/* Confirm card: the same surface as the composer, but smaller */
+.confirm {
+  width: min(380px, 100%);
+  display: grid;
+  gap: 14px;
+  padding: 22px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 30px 80px var(--shadow);
+  animation: rise-in 0.2s ease-out;
+}
+
+.confirm h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.confirm p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 textarea {
   width: 100%;
-  min-height: 96px;
-  padding: 12px 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  font-size: 16px;
-  line-height: 1.5;
-  resize: vertical;
-}
-
-textarea:focus,
-input:focus,
-select:focus {
-  outline: none;
-  border-color: var(--accent);
-}
-
-.field span {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-input[type="date"],
-select {
-  padding: 9px 10px;
-  background: var(--surface);
+  min-height: 84px;
+  padding: 10px 14px;
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 10px;
+  font-size: 16px;
+  line-height: 1.5;
+  resize: none;
 }
 
-.time-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+textarea:focus {
+  outline: none;
+  border-color: var(--text);
+}
+
+/* Field labels: the small muted caption above each control */
+.field {
+  display: grid;
   gap: 8px;
 }
 
-.colon {
+.field-label {
+  font-size: 12px;
   color: var(--muted);
+}
+
+.date-summary {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--text);
+}
+
+/* Quick date chips: Today, Tomorrow, and the calendar toggle */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+.chip[aria-pressed="true"],
+.chip[aria-expanded="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--ink-text);
+}
+
+/* Month calendar: hidden until "Another day" is chosen */
+.calendar {
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.cal-title {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--text);
+}
+
+/* The calendar's previous and next buttons */
+.step-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.step-btn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-weekday {
+  padding: 2px 0;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cal-blank {
+  height: 28px;
+}
+
+.cal-day {
+  height: 28px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.cal-day:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+/* Past days: clearly unavailable, muted and dimmed, with no hover */
+.cal-day:disabled {
+  color: var(--muted);
+  opacity: 0.35;
+  cursor: default;
+  text-decoration: line-through;
+}
+
+.cal-day.is-today {
+  box-shadow: inset 0 0 0 1px var(--muted);
+}
+
+/* The selected day keeps its ink colours, even under the mouse */
+.cal-day[aria-pressed="true"],
+.cal-day[aria-pressed="true"]:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--ink-text);
+}
+/* Hour and minute chips: one row of twelve each, so every value is one tap */
+.num-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+  gap: 4px;
+}
+
+.num-chip {
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--serif);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.num-chip:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+}
+
+.num-chip[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--ink-text);
+}
+
+/* The time summary sits left, AM/PM sits right, on one line */
+.time-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .meridiem {
   display: inline-flex;
-  margin-left: 6px;
+  padding: 2px;
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
+  border-radius: 8px;
 }
 
 .meridiem button {
-  padding: 8px 14px;
+  padding: 5px 12px;
   border: none;
+  border-radius: 6px;
   background: transparent;
   color: var(--muted);
   font-weight: 600;
+  font-size: 13px;
   cursor: pointer;
 }
 
 .meridiem button[aria-pressed="true"] {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--ink);
+  color: var(--ink-text);
 }
 
 .composer-actions {
@@ -719,6 +993,8 @@ select {
 .hint {
   margin: 0;
   text-align: right;
+  font-family: var(--serif);
+  font-style: italic;
   font-size: 12px;
   color: var(--muted);
 }

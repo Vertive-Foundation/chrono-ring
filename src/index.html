@@ -49,26 +49,26 @@
       <p id="load-error" class="error-banner" hidden></p>
 
       <section id="upcoming-section" hidden>
-        <h2>Upcoming</h2>
+        <h2 class="section-label">Upcoming</h2>
         <ul id="upcoming" class="cards"></ul>
       </section>
 
       <section id="past-section" hidden>
-        <h2>Finished</h2>
+        <h2 class="section-label">Finished</h2>
         <ul id="past" class="cards"></ul>
       </section>
 
       <section id="empty-state" class="empty-card" hidden>
         <img class="logo logo-lg" src="logo.svg" alt="" />
-        <h2 class="empty-title">No reminders yet</h2>
+        <h2 class="empty-title">Nothing scheduled</h2>
         <p class="empty-text">
-          Add one for anything you don't want to forget. It will ring at the time you choose.
+          Add a reminder and ChronoRing will ring at the time you pick.
         </p>
         <button id="empty-new-btn" class="pill-btn" type="button">
           <span class="plus" aria-hidden="true">+</span>
           <span>New reminder</span>
         </button>
-        <p class="shortcut">or press <kbd>Ctrl</kbd>+<kbd>N</kbd></p>
+        <p class="shortcut">or press <kbd>Ctrl</kbd> <kbd>N</kbd></p>
       </section>
     </main>
 
@@ -95,22 +95,36 @@
 
         <textarea
           id="note"
-          rows="4"
+          rows="3"
           maxlength="280"
           placeholder="What do you need to remember?"
         ></textarea>
 
         <div class="field">
-          <span>Date</span>
-          <input type="date" id="date" required />
+          <span class="field-label">Date</span>
+          <div class="chips" role="group" aria-label="Quick date">
+            <button type="button" class="chip" data-day="0" aria-pressed="false">Today</button>
+            <button type="button" class="chip" data-day="1" aria-pressed="false">Tomorrow</button>
+            <button type="button" id="other-day" class="chip" aria-expanded="false" aria-controls="calendar-wrap">Another day</button>
+          </div>
+          <p id="date-summary" class="date-summary"></p>
+
+          <div id="calendar-wrap" class="calendar" hidden>
+            <div class="cal-head">
+              <button type="button" id="cal-prev" class="step-btn" aria-label="Previous month">&lsaquo;</button>
+              <span id="cal-month" class="cal-title" aria-live="polite"></span>
+              <button type="button" id="cal-next" class="step-btn" aria-label="Next month">&rsaquo;</button>
+            </div>
+            <div id="cal-grid" class="cal-grid" role="group" aria-label="Choose a day"></div>
+          </div>
         </div>
 
         <div class="field">
-          <span>Time</span>
-          <div class="time-row">
-            <select id="hour" aria-label="Hour"></select>
-            <span class="colon">:</span>
-            <select id="minute" aria-label="Minute"></select>
+          <span class="field-label">Time</span>
+          <div id="hour-grid" class="num-grid" role="group" aria-label="Hour"></div>
+          <div id="minute-grid" class="num-grid" role="group" aria-label="Minute"></div>
+          <div class="time-head">
+            <p id="time-summary" class="date-summary"></p>
             <div class="meridiem" role="group" aria-label="AM or PM">
               <button type="button" data-meridiem="am" aria-pressed="true">AM</button>
               <button type="button" data-meridiem="pm" aria-pressed="false">PM</button>
@@ -127,6 +141,24 @@
         </div>
         <p class="hint">Ctrl+Enter to save · Esc to close</p>
       </form>
+    </div>
+
+    <!-- In-app confirmation, replacing the browser's own dialog -->
+    <div id="confirm-backdrop" class="backdrop" hidden>
+      <div
+        class="confirm"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+        aria-describedby="confirm-text"
+      >
+        <h2 id="confirm-title">Delete this reminder?</h2>
+        <p id="confirm-text"></p>
+        <div class="composer-actions">
+          <button type="button" id="confirm-keep" class="ghost">Keep</button>
+          <button type="button" id="confirm-delete" class="ghost danger-solid">Delete</button>
+        </div>
+      </div>
     </div>
   </body>
 </html>
