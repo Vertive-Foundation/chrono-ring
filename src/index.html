@@ -46,6 +46,16 @@
     </header>
 
     <main>
+      <!-- One-time notice about startup. Hidden unless it has not been dismissed yet. -->
+      <aside id="startup-notice" class="notice" hidden>
+        <p>
+          ChronoRing starts with Windows so your alarms can ring. You can change this from the
+          tray icon (right-click, then Start with Windows). If it doesn't open when you sign in,
+          check <strong>Settings → Apps → Startup</strong>.
+        </p>
+        <button id="notice-dismiss" class="ghost small" type="button">Got it</button>
+      </aside>
+
       <p id="load-error" class="error-banner" hidden></p>
 
       <section id="upcoming-section" hidden>

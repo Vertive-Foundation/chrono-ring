@@ -4,6 +4,7 @@ const appWindow = window.__TAURI__.window.getCurrentWindow();
 
 const $ = (id) => document.getElementById(id);
 const THEME_KEY = "chronoring-theme";
+const NOTICE_KEY = "chronoring-startup-notice-seen";
 
 const els = {
   newBtn: $("new-btn"),
@@ -14,6 +15,8 @@ const els = {
   pastSection: $("past-section"),
   emptyState: $("empty-state"),
   loadError: $("load-error"),
+  startupNotice: $("startup-notice"),
+  noticeDismiss: $("notice-dismiss"),
   backdrop: $("composer-backdrop"),
   form: $("composer"),
   title: $("composer-title"),
@@ -93,6 +96,19 @@ function applyTheme(choice) {
   localStorage.setItem(THEME_KEY, choice);
   els.themeButtons.forEach((btn) => {
     btn.setAttribute("aria-pressed", String(btn.dataset.themeChoice === choice));
+  });
+}
+
+/* Startup notice */
+
+// Shows the one-time notice unless it was dismissed on this PC before.
+function setupStartupNotice() {
+  if (localStorage.getItem(NOTICE_KEY)) return;
+
+  els.startupNotice.hidden = false;
+  els.noticeDismiss.addEventListener("click", () => {
+    localStorage.setItem(NOTICE_KEY, "1");
+    els.startupNotice.hidden = true;
   });
 }
 
@@ -631,6 +647,7 @@ async function saveAlarm(event) {
 
 buildTimeGrids();
 applyTheme(localStorage.getItem(THEME_KEY) || "system");
+setupStartupNotice();
 
 els.winMin.addEventListener("click", () => appWindow.minimize());
 els.winMax.addEventListener("click", () => appWindow.toggleMaximize());

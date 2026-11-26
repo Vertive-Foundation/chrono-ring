@@ -4,6 +4,7 @@ mod sound;
 mod store;
 mod time;
 
+use std::fs;
 use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
@@ -32,6 +33,10 @@ const ALARMS_RINGING_EVENT: &str = "alarms-ringing";
 
 /// File name of the database, inside the app's data folder.
 const DATABASE_FILE: &str = "alarms.db";
+
+/// Marker file that records the first run has happened. Its presence means
+/// the default startup setting was already applied, so it is never applied again.
+const FIRST_RUN_MARKER: &str = "first-run-done";
 
 /// Identifiers for the tray menu items. Matched when a menu item is clicked.
 const TRAY_SHOW_ID: &str = "show";
@@ -234,6 +239,25 @@ fn toggle_autostart(app: &AppHandle, item: &CheckMenuItem<Wry>) {
     }
 }
 
+/// On the very first launch, turns on "Start with Windows" so alarms work after a restart.
+/// A marker file records that this happened, so the user's later choice is never overridden.
+fn apply_first_run_default(app: &AppHandle, data_dir: &std::path::Path) {
+    let marker = data_dir.join(FIRST_RUN_MARKER);
+    if marker.exists() {
+        return;
+    }
+
+    if let Err(err) = app.autolaunch().enable() {
+        eprintln!("could not enable start with Windows on first run: {err}");
+        // Leave the marker absent so the next launch tries again.
+        return;
+    }
+
+    if let Err(err) = fs::write(&marker, b"done") {
+        eprintln!("could not record the first run: {err}");
+    }
+}
+
 /// Builds the tray icon with its right-click menu.
 /// A left click on the icon shows the window again.
 fn build_tray(app: &AppHandle) -> tauri::Result<()> {
@@ -309,7 +333,10 @@ pub fn run() {
             // The app's own data folder, created on first run.
             // On Windows this is inside AppData\Roaming\com.vc.chrono-ring.
             let data_dir = app.path().app_data_dir()?;
-            std::fs::create_dir_all(&data_dir)?;
+            fs::create_dir_all(&data_dir)?;
+
+            apply_first_run_default(app.handle(), &data_dir);
+
             let store = AlarmStore::open(&data_dir.join(DATABASE_FILE))?;
             app.manage(Mutex::new(store));
 
