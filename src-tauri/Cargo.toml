@@ -1,6 +1,6 @@
 [package]
 name = "chrono-ring"
-version = "0.1.0"
+version = "1.0.0"
 description = "ChronoRing, a reminder app that rings at the time you choose"
 authors = ["Vertive Foundation"]
 edition = "2024"
